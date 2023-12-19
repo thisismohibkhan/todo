@@ -3,6 +3,8 @@ package com.nafys.todo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -21,40 +23,40 @@ import jakarta.validation.Valid;
 public class TodosController {
 	@Autowired
 	private TodoService todoService;
-	
+
 	@GetMapping("list-todos")
 	public String listTodos(ModelMap model) {
-		List<Todo> todos = todoService.getAllTodos();
+		String username = getLoggedInUsername(model);
+		List<Todo> todos = todoService.findByUsername(username);
 		model.addAttribute("todos", todos);
 		return "list-todos";
 	}
-	
+
 	@GetMapping("add-todo")
 	public String showNewTodoPage(ModelMap model) {
-		String username = (String)model.get("name");
+		String username = getLoggedInUsername(model);
 		Todo todo = new Todo(0l, username, "", null, false);
 		model.put("todo", todo);
 		return "add-todo";
 	}
-	
+
 	@PostMapping("add-todo")
-	public String addTodo(ModelMap model, @Valid Todo todo, BindingResult result ) {
-		if(result.hasErrors()) {
+	public String addTodo(ModelMap model, @Valid Todo todo, BindingResult result) {
+		if (result.hasErrors()) {
 			return "add-todo";
 		}
-		String username = (String)model.get("name");
-		todoService.addTodo(username, todo.getDescription(), 
-				todo.getTargetDate(), false);
+		String username = (String) model.get("name");
+		todoService.addTodo(username, todo.getDescription(), todo.getTargetDate(), false);
 		return "redirect:list-todos";
 	}
-	
+
 	@GetMapping("delete-todo")
 	public String deleteTodo(@RequestParam Long id) {
-		//Delete todo
-		
+		// Delete todo
+
 		todoService.deleteById(id);
 		return "redirect:list-todos";
-		
+
 	}
 
 	@GetMapping("update-todo")
@@ -63,16 +65,19 @@ public class TodosController {
 		model.addAttribute("todo", todo);
 		return "add-todo";
 	}
-	
+
 	@PostMapping("update-todo")
-	public String updateTodo(ModelMap model, @Valid Todo todo, BindingResult result ) {
-		if(result.hasErrors()) {
+	public String updateTodo(ModelMap model, @Valid Todo todo, BindingResult result) {
+		if (result.hasErrors()) {
 			return "add-todo";
 		}
-		String username = (String)model.get("name");
+		String username = getLoggedInUsername(model);
 		todo.setUsername(username);
-		System.out.println(todo);
 		todoService.updateTodo(todo);
 		return "redirect:list-todos";
+	}
+
+	private String getLoggedInUsername(ModelMap model) {
+		return (String)model.get("name");
 	}
 }
