@@ -2,10 +2,18 @@ package com.nafys.todo.model;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import jakarta.validation.constraints.Size;
 
+@Entity
 public class Todo {
 	
+	
+	public Todo() {
+		super();
+	}
 	public Todo(Long id, String username, String description, LocalDate targetDate, Boolean done) {
 		super();
 		this.id = id;
@@ -14,9 +22,11 @@ public class Todo {
 		this.targetDate = targetDate;
 		this.done = done;
 	}
+	@Id
+	@GeneratedValue
 	private Long id;
 	private String username;
-	@Size(min=10, message="Enter atleast 10 characters")
+	@Size(min=4, message="Enter atleast 4 characters")
 	private String description;
 	private LocalDate targetDate;
 	private Boolean done;
